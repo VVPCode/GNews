@@ -9,18 +9,17 @@ import {
   SafeAreaView,
   Platform,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
+  ScrollView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-
 // --- CONFIGURAÇÃO DO EMAILJS ---
-const SERVICE_ID = 'service_4o879cp';
+const SERVICE_ID = 'service_4o879cp'; 
 const TEMPLATE_ID = 'template_uup7b7x';
 const PUBLIC_KEY = 'r1OWWHF2bs-FCuTWs';
 // ------------------------------
 
-// MODIFICAÇÃO: Recebemos 'onLoginSuccess' como prop
 const LoginScreen = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -37,6 +36,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
 
   const handleEnviarCodigo = () => {
     if (!email || !email.includes('@')) {
+      // No Web, Alert.alert usa o alert() do navegador, que é funcional mas simples.
       Alert.alert('Erro', 'Por favor, digite um e-mail válido.');
       return;
     }
@@ -73,26 +73,16 @@ const LoginScreen = ({ onLoginSuccess }) => {
     .then((responseText) => {
       console.log('E-mail enviado com sucesso!', responseText);
       setTelaAtiva('otp');
-      Alert.alert(
-        'Código Enviado',
-        `Um código de 6 dígitos foi enviado para ${email}.`
-      );
+      if (Platform.OS === 'web') {
+        window.alert(`Código enviado para ${email}`);
+      } else {
+        Alert.alert('Código Enviado', `Um código de 6 dígitos foi enviado para ${email}.`);
+      }
     })
     .catch((error) => {
       console.error('Erro ao enviar e-mail:', error.message);
-      let alertMessage = 'Não foi possível enviar o código. Verifique suas credenciais EmailJS e a conexão.';
-      const errorMessage = error.message || '';
-      if (errorMessage.includes("The user_id is required")) {
-          alertMessage = 'Erro: A Public Key (user_id) do EmailJS está faltando ou é inválida.';
-      } else if (errorMessage.includes("The service_id is required")) {
-          alertMessage = 'Erro: O Service ID do EmailJS está faltando ou é inválido.';
-      } else if (errorMessage.includes("The template_id is required")) {
-          alertMessage = 'Erro: O Template ID do EmailJS está faltando ou é inválido.';
-      } else if (errorMessage.includes("Network request failed")) {
-          alertMessage = 'Erro de rede. Verifique sua conexão com a internet.';
-      } else if (errorMessage.includes("401")) { // Possível erro de autorização se a API não estiver permitida
-          alertMessage = 'Erro de autorização. Verifique se "Allow EmailJS API for non-browser applications" está marcado nas configurações de segurança do EmailJS.';
-      }
+      let alertMessage = 'Não foi possível enviar o código.';
+      // Lógica de erro simplificada para o exemplo
       Alert.alert('Erro no Envio', alertMessage);
     })
     .finally(() => {
@@ -107,11 +97,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
     }
 
     if (otpCode === codigoGerado) {
-      // MODIFICAÇÃO: Em vez de um alerta, chamamos a função
-      // Alert.alert('Sucesso!', 'Login realizado com sucesso! Bem-vindo(a)!');
-      onLoginSuccess(); // <-- ISSO NOS LOGA NO APP
-      
-      // Limpamos os campos (opcional, mas bom)
+      onLoginSuccess();
       setTelaAtiva('login');
       setEmail('');
       setOtpCode('');
@@ -121,6 +107,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
     }
   };
 
+  // Conteúdo da Tela de Login
   const renderLoginTela = () => (
     <View style={styles.card}>
       <Text style={styles.title}>Acesse sua Conta</Text>
@@ -142,7 +129,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
         style={styles.buttonContainer}
       >
         <LinearGradient
-          colors={isLoading ? ['#999', '#777'] : ['#6A0DAD', '#B200ED']} // Gradiente para o botão
+          colors={isLoading ? ['#999', '#777'] : ['#6A0DAD', '#B200ED']}
           style={[styles.button, isLoading && styles.buttonDisabled]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -157,11 +144,12 @@ const LoginScreen = ({ onLoginSuccess }) => {
     </View>
   );
 
+  // Conteúdo da Tela de OTP
   const renderOTPTela = () => (
     <View style={styles.card}>
-      <Text style={styles.title}>Verificação de Código</Text>
+      <Text style={styles.title}>Verificação</Text>
       <Text style={styles.subtitle}>
-        Digite o código de 6 dígitos enviado para: 
+        Digite o código enviado para: 
       </Text>
       <Text style={styles.emailText}>{email}</Text>
 
@@ -202,14 +190,18 @@ const LoginScreen = ({ onLoginSuccess }) => {
 
   return (
     <LinearGradient
-      colors={['#1a1f38', '#0f1220']} // Gradiente para o background geral
+      colors={['#1a1f38', '#0f1220']}
       style={styles.container}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" backgroundColor="#1a1f38" />
-        {telaAtiva === 'login' ? renderLoginTela() : renderOTPTela()}
+        <ScrollView 
+          contentContainerStyle={styles.scrollViewContent} 
+          showsVerticalScrollIndicator={false}
+        >
+          {telaAtiva === 'login' ? renderLoginTela() : renderOTPTela()}
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -224,17 +216,22 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     width: '100%',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingVertical: 20,
   },
   card: {
     width: '90%',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)', // Fundo translúcido
-    borderRadius: 25, // Bordas mais arredondadas
+    // IMPORTANTE PARA WEB: Limita a largura máxima
+    maxWidth: 400, 
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 25,
     padding: 30,
     alignItems: 'center',
-    // Estilo "glassmorphic" com sombra interna/externa
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
@@ -247,11 +244,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#E0BBE4', // Cor vibrante
+    color: '#E0BBE4',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#BBF0F3', // Cor suave
+    color: '#BBF0F3',
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 24,
@@ -266,20 +264,17 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 55,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Fundo do input translúcido
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 15,
     paddingHorizontal: 20,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
     fontSize: 17,
-    color: '#fff', // Texto do input branco
-    // Sombra interna para dar efeito de "rebaixo"
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
+    color: '#fff',
+    ...Platform.select({
+      web: { outlineStyle: 'none' }
+    })
   },
   otpInput: {
     width: '85%',
@@ -289,26 +284,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 25,
     borderWidth: 2,
-    borderColor: '#B200ED', // Cor da borda mais vibrante
+    borderColor: '#B200ED',
     fontSize: 32,
     letterSpacing: 12,
     color: '#fff',
     fontWeight: 'bold',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Platform.select({
+      web: { outlineStyle: 'none' }
+    })
   },
   buttonContainer: {
     width: '100%',
     borderRadius: 15,
-    overflow: 'hidden', // Importante para o gradiente e borda
+    overflow: 'hidden',
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
     elevation: 6,
   },
   button: {
@@ -316,28 +305,34 @@ const styles = StyleSheet.create({
     height: 55,
     justifyContent: 'center',
     alignItems: 'center',
+    ...Platform.select({
+      web: { cursor: 'pointer' }
+    })
   },
   buttonDisabled: {
-    opacity: 0.7, // Menos opaco quando desabilitado
+    opacity: 0.7,
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)', // Sombra no texto
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   reenviarText: {
     color: '#BBF0F3',
     fontSize: 15,
     textDecorationLine: 'underline',
     marginTop: 10,
+    ...Platform.select({
+      web: { cursor: 'pointer' }
+    })
   },
   voltarText: {
     color: '#888',
     fontSize: 14,
     marginTop: 15,
+    ...Platform.select({
+      web: { cursor: 'pointer' }
+    })
   }
 });
 

@@ -11,13 +11,13 @@ import {
   TouchableOpacity,
   Image,
   Linking,
-  Alert
+  Alert,
+  Dimensions
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // --- CONFIGURAÇÃO DA API DE NOTÍCIAS (GNEWS) ---
-// Obtenha sua chave gratuita em https://gnews.io/
-const GNEWS_API_KEY = '7a3d59a5900abad884aa0e963c80ccb0';
+const GNEWS_API_KEY = '7a3d59a5900abad884aa0e963c80ccb0'; 
 // ----------------------------------------------
 
 // Componente para um item da lista de notícias
@@ -30,6 +30,7 @@ const NewsCard = ({ article }) => (
     <Image 
       source={{ uri: article.image || 'https://placehold.co/600x400/2a2f4a/E0BBE4?text=Notícia' }} 
       style={styles.cardImage} 
+      resizeMode="cover"
     />
     <View style={styles.cardContent}>
       {/* Título da notícia */}
@@ -44,31 +45,52 @@ const NewsScreen = ({ onLogout }) => {
   const [news, setNews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // useEffect para buscar as notícias quando o componente carregar
+  // Obter largura da tela para ajustes
+  const screenWidth = Dimensions.get('window').width;
+
   useEffect(() => {
     fetchNews();
   }, []);
 
   const fetchNews = () => {
-    // REMOVIDO o bloco if que verificava a chave
-    // if (GNEWS_API_KEY === '7a3d59a5900abad884aa0e963c80ccb0') { ... }
-
     setIsLoading(true);
-    // MODIFICADO: Garantindo que a constante GNEWS_API_KEY seja usada na URL
-    const url = `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&token=${GNEWS_API_KEY}`;
+
+    // 1. Montamos a URL original da GNews
+    let url = `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&token=${GNEWS_API_KEY}`;
     
+    // 2. CORREÇÃO PARA WEB (CORS):
+    if (Platform.OS === 'web') {
+      url = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    }
+    
+    console.log("Buscando notícias em:", url); // Log para ajudar a debugar
+
     fetch(url)
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+           throw new Error(`Erro HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
+        // A API GNews retorna { articles: [...] }
+        // Se usarmos proxy, o retorno é o mesmo JSON.
         if (data.articles) {
           setNews(data.articles);
+        } else if (data.errors) {
+           // GNews às vezes retorna erros dentro do JSON
+           Alert.alert('Erro da API', JSON.stringify(data.errors));
         } else {
-          Alert.alert('Erro ao buscar notícias', data.message || 'Ocorreu um erro.');
+          Alert.alert('Aviso', 'Nenhuma notícia encontrada ou formato inesperado.');
         }
       })
       .catch(error => {
         console.error("Erro ao buscar notícias:", error);
-        Alert.alert('Erro de Rede', 'Não foi possível buscar as notícias. Verifique sua conexão.');
+        // Na web, mostramos um alerta mais descritivo
+        const msg = Platform.OS === 'web' 
+          ? 'Erro de CORS ou Rede. Veja o Console (F12) para detalhes.' 
+          : 'Não foi possível buscar as notícias.';
+        Alert.alert('Erro de Rede', msg);
       })
       .finally(() => {
         setIsLoading(false);
@@ -77,7 +99,7 @@ const NewsScreen = ({ onLogout }) => {
 
   return (
     <LinearGradient
-      colors={['#1a1f38', '#0f1220']} // Mesmo gradiente de fundo
+      colors={['#1a1f38', '#0f1220']}
       style={styles.container}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -85,30 +107,41 @@ const NewsScreen = ({ onLogout }) => {
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="light-content" backgroundColor="#1a1f38" />
         
-        {/* Cabeçalho */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Últimas Notícias</Text>
-          <TouchableOpacity onPress={onLogout}>
-            <Text style={styles.logoutText}>Sair</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Conteúdo (Lista ou Loading) */}
-        {isLoading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#E0BBE4" />
-            <Text style={styles.loadingText}>Buscando notícias...</Text>
+        {/* Container centralizado para limitar largura na Web */}
+        <View style={styles.webContainer}>
+          
+          {/* Cabeçalho */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Últimas Notícias</Text>
+            <TouchableOpacity onPress={onLogout}>
+              <Text style={styles.logoutText}>Sair</Text>
+            </TouchableOpacity>
           </View>
-        ) : (
-          <FlatList
-            data={news}
-            renderItem={({ item }) => <NewsCard article={item} />}
-            keyExtractor={(item) => item.url} // Usa a URL como ID único
-            contentContainerStyle={{ paddingHorizontal: 15, paddingBottom: 20 }}
-            onRefresh={fetchNews} // Permite "puxar para atualizar"
-            refreshing={isLoading}
-          />
-        )}
+
+          {/* Conteúdo (Lista ou Loading) */}
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#E0BBE4" />
+              <Text style={styles.loadingText}>Buscando notícias...</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={news}
+              renderItem={({ item }) => <NewsCard article={item} />}
+              keyExtractor={(item, index) => item.url ? item.url + index : String(index)}
+              contentContainerStyle={{ paddingBottom: 20 }}
+              onRefresh={fetchNews}
+              refreshing={isLoading}
+              showsVerticalScrollIndicator={false}
+              // Empty Component para quando não houver notícias
+              ListEmptyComponent={
+                <Text style={{color: 'white', textAlign: 'center', marginTop: 20}}>
+                  Nenhuma notícia disponível no momento.
+                </Text>
+              }
+            />
+          )}
+        </View>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -122,22 +155,32 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 10,
   },
+  webContainer: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 800, 
+    alignSelf: 'center', 
+    paddingHorizontal: 15, 
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
     marginBottom: 20,
+    marginTop: 10,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#E0BBE4', // Cor vibrante
+    color: '#E0BBE4',
   },
   logoutText: {
     color: '#BBF0F3',
     fontSize: 16,
     textDecorationLine: 'underline',
+    ...Platform.select({
+      web: { cursor: 'pointer' }
+    })
   },
   loadingContainer: {
     flex: 1,
@@ -149,14 +192,12 @@ const styles = StyleSheet.create({
     color: '#BBF0F3',
     fontSize: 16,
   },
-  // Estilo do Card de Notícia
   card: {
     width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)', // Fundo translúcido
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 20,
     marginBottom: 20,
-    overflow: 'hidden', // Garante que a imagem não vaze
-    // Sombra (mesma estética)
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.3,
@@ -164,11 +205,14 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    ...Platform.select({
+      web: { cursor: 'pointer' }
+    })
   },
   cardImage: {
     width: '100%',
-    height: 180,
-    backgroundColor: '#2a2f4a', // Cor de fundo enquanto a imagem carrega
+    height: 200, 
+    backgroundColor: '#2a2f4a',
   },
   cardContent: {
     padding: 15,
@@ -177,7 +221,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 5,
+    marginBottom: 8,
   },
   cardSource: {
     fontSize: 14,
