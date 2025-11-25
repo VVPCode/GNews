@@ -15,9 +15,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 // --- CONFIGURAÇÃO DO EMAILJS ---
-const SERVICE_ID = 'service_4o879cp'; 
-const TEMPLATE_ID = 'template_uup7b7x';
-const PUBLIC_KEY = 'r1OWWHF2bs-FCuTWs';
+const SERVICE_ID = 'SERVICE_ID'; 
+const TEMPLATE_ID = 'TEMPLATE_ID';
+const PUBLIC_KEY = 'PUBLIC_KEY';
 // ------------------------------
 
 const LoginScreen = ({ onLoginSuccess }) => {

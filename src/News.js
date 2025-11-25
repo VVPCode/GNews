@@ -17,7 +17,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 // --- CONFIGURAÇÃO DA API DE NOTÍCIAS (GNEWS) ---
-const GNEWS_API_KEY = '7a3d59a5900abad884aa0e963c80ccb0'; 
+const GNEWS_API_KEY = 'GNEWS_API_KEY'; 
 // ----------------------------------------------
 
 // Componente para um item da lista de notícias
