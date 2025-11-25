@@ -10,14 +10,14 @@ import {
   Platform,
   StatusBar,
   ActivityIndicator,
-  ScrollView
+  ScrollView // Importante para telas menores ou modo paisagem no celular
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 // --- CONFIGURAÇÃO DO EMAILJS ---
-const SERVICE_ID = 'SERVICE_ID'; 
-const TEMPLATE_ID = 'TEMPLATE_ID';
-const PUBLIC_KEY = 'PUBLIC_KEY';
+const SERVICE_ID = 'service_aehis8f'; 
+const TEMPLATE_ID = 'template_uup7b7x';
+const PUBLIC_KEY = 'r1OWWHF2bs-FCuTWs';
 // ------------------------------
 
 const LoginScreen = ({ onLoginSuccess }) => {
@@ -82,7 +82,6 @@ const LoginScreen = ({ onLoginSuccess }) => {
     .catch((error) => {
       console.error('Erro ao enviar e-mail:', error.message);
       let alertMessage = 'Não foi possível enviar o código.';
-      // Lógica de erro simplificada para o exemplo
       Alert.alert('Erro no Envio', alertMessage);
     })
     .finally(() => {
@@ -161,7 +160,6 @@ const LoginScreen = ({ onLoginSuccess }) => {
         maxLength={6}
         value={otpCode}
         onChangeText={setOtpCode}
-        textAlign='center'
       />
 
       <TouchableOpacity
@@ -226,7 +224,6 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '90%',
-    // IMPORTANTE PARA WEB: Limita a largura máxima
     maxWidth: 400, 
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 25,
@@ -281,14 +278,21 @@ const styles = StyleSheet.create({
     height: 65,
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 15,
-    paddingHorizontal: 15,
+    // paddingHorizontal removido para não brigar com o textAlign
     marginBottom: 25,
     borderWidth: 2,
     borderColor: '#B200ED',
     fontSize: 32,
-    letterSpacing: 12,
     color: '#fff',
     fontWeight: 'bold',
+    
+    // --- LÓGICA DE CENTRALIZAÇÃO ---
+    textAlign: 'center',
+    letterSpacing: 12, 
+    // TRUQUE: Adiciona padding na esquerda igual ao letterSpacing
+    // para compensar o espaço vazio que o letterSpacing cria na direita.
+    paddingLeft: 12,
+    
     ...Platform.select({
       web: { outlineStyle: 'none' }
     })
