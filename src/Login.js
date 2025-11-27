@@ -10,7 +10,7 @@ import {
   Platform,
   StatusBar,
   ActivityIndicator,
-  ScrollView // Importante para telas menores ou modo paisagem no celular
+  ScrollView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -36,7 +36,6 @@ const LoginScreen = ({ onLoginSuccess }) => {
 
   const handleEnviarCodigo = () => {
     if (!email || !email.includes('@')) {
-      // No Web, Alert.alert usa o alert() do navegador, que é funcional mas simples.
       Alert.alert('Erro', 'Por favor, digite um e-mail válido.');
       return;
     }
