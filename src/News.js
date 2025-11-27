@@ -19,11 +19,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 // --- CONFIGURAÇÃO DA API DE NOTÍCIAS (GNEWS) ---
-// Substitua pela sua chave real se necessário
 const GNEWS_API_KEY = '7a3d59a5900abad884aa0e963c80ccb0'; 
 // ----------------------------------------------
 
-// Categorias disponíveis na GNews
 const CATEGORIES = [
   { id: 'general', label: 'Geral' },
   { id: 'world', label: 'Mundo' },
