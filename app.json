@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "News_app",
-    "slug": "News_app",
+    "name": "GNews",
+    "slug": "GNews",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,10 +20,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.vvpcode.GNews"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "88072c5b-a64c-4fb4-8374-6b4a965541e0"
+      }
     }
   }
 }
