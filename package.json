@@ -10,6 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@expo/metro-runtime": "~6.1.2",
     "expo": "^54.0.25",
     "expo-linear-gradient": "~15.0.7",

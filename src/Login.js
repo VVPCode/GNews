@@ -30,7 +30,7 @@ const LoginScreen = ({ onLoginSuccess }) => {
   const gerarOTP = () => {
     const novoCodigo = Math.floor(100000 + Math.random() * 900000).toString();
     setCodigoGerado(novoCodigo);
-    console.log("CÓDIGO OTP GERADO (simulação): " + novoCodigo);
+    console.log("CÓDIGO OTP GERADO: " + novoCodigo);
     return novoCodigo;
   };
 

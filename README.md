@@ -1,123 +1,174 @@
-📱 App de Notícias & Login OTP (Expo)
 
-Um aplicativo moderno e multiplataforma desenvolvido com React Native (Expo). Este projeto demonstra um fluxo completo de autenticação via código OTP (One-Time Password) integrado a serviços de e-mail reais e uma interface de consumo de notícias em tempo real.
+---
 
-O diferencial deste projeto é a sua estética Glassmorphism (efeito de vidro) e a compatibilidade total com Android, iOS e Web.
+# 📱 GNews Reader & OTP Auth (Expo)
 
-📸 Funcionalidades
+Um aplicativo **multiplataforma** (Android, iOS e Web) que combina **autenticação segura via OTP** com um **leitor de notícias moderno**.
+Este projeto demonstra um fluxo completo de autenticação (Login → E-mail OTP → Acesso) e consumo de API de Notícias, com design *glassmorphism* e compatibilidade total com navegadores e dispositivos móveis.
 
-🔐 Autenticação e Segurança
+---
 
-Login via OTP: Geração lógica de códigos de 6 dígitos.
+## 📸 Funcionalidades
 
-Envio Real de E-mail: Integração com a API REST do EmailJS para enviar o código ao usuário.
+### 🔐 Autenticação & Segurança
 
-Validação: Verificação de segurança para garantir que o código digitado corresponde ao enviado.
+* [x] Login via OTP com geração de código de 6 dígitos.
+* [x] Envio real de e-mail usando **EmailJS**.
+* [x] Validação segura entre código gerado e digitado.
+* [x] Feedback visual com loaders e mensagens de erro/sucesso.
 
-📰 Feed de Notícias
+### 📰 Feed de Notícias
 
-Consumo de API: Integração com GNews API para buscar as últimas manchetes do Brasil.
+* [x] Consumo da **GNews API** para notícias em tempo real.
+* [x] Filtros por categoria (Tecnologia, Esportes, Negócios, Saúde…).
+* [x] Campo de busca com palavras-chave.
+* [x] Sistema de favoritos salvo localmente.
+* [x] Web Proxy configurado para evitar erros de CORS no navegador.
 
-Suporte Web (CORS): Implementação de Proxy reverso para contornar bloqueios de CORS em navegadores, garantindo funcionamento na Web.
+### 🎨 UI/UX (Interface)
 
-Navegação Externa: Links diretos para ler as notícias completas.
+* [x] Design moderno utilizando **LinearGradient** e glassmorphism.
+* [x] Layout 100% responsivo para Web, Android e iOS.
 
-🎨 UI/UX (Interface)
+---
 
-Glassmorphism: Uso de gradientes lineares, transparências e sombras para criar profundidade e visual moderno.
+## 🛠 Tecnologias Utilizadas
 
-Responsividade:
+* **React Native**
+* **Expo**
+* **Expo Linear Gradient**
+* **EmailJS**
+* **GNews API**
+* **EAS (Expo Application Services)**
 
-Layout adaptável para dispositivos móveis.
+---
 
-Limitação de largura (maxWidth) para visualização elegante em Desktops/Web.
+## 📦 Instalação e Configuração
 
-Feedback Visual: Indicadores de carregamento (ActivityIndicator) e alertas nativos/web.
+### 🔧 1. Clonar e instalar dependências
 
-🛠 Tecnologias Utilizadas
-
-React Native - Framework principal.
-
-Expo - Plataforma de desenvolvimento.
-
-Expo Linear Gradient - Para os fundos e botões gradientes.
-
-EmailJS - Serviço de envio de e-mails transacionais (via API REST).
-
-GNews API - Fonte de dados das notícias.
-
-📦 Pré-requisitos
-
-Para rodar este projeto localmente, você precisará de:
-
-Node.js (Versão LTS v20 ou superior recomendada).
-
-Git.
-
-Aplicativo Expo Go instalado no celular (para testes físicos).
-
-🚀 Como Rodar o Projeto
-
-1. Clone o repositório
-
-git clone [https://github.com/SEU_USUARIO/NOME_DO_REPO.git](https://github.com/SEU_USUARIO/NOME_DO_REPO.git)
+```bash
+git clone https://github.com/SEU_USUARIO/NOME_DO_REPO.git
 cd NOME_DO_REPO
 
-
-2. Instale as dependências
-
 npm install
-# Ou, se preferir usar o comando do expo:
-npx expo install
+```
 
+### 🔧 2. Dependências críticas (Web e UI)
 
-3. Configuração das Chaves de API 🔑
+Execute:
 
-Por segurança, as chaves de API não estão incluídas no repositório. Você deve configurar as suas:
+```bash
+npm install @emailjs/browser
 
-Passo A: EmailJS (Login)
+npx npx expo install react-native-web react-dom @expo/metro-runtime
 
-Crie uma conta no EmailJS.
+### 🔑 3. Configurar Chaves de API (Obrigatório)
 
-Habilite a opção "Allow EmailJS API for non-browser applications" nas configurações de segurança da sua conta.
+| Serviço | Arquivo              | Variáveis                           |
+| ------- | -------------------- | ----------------------------------- |
+| EmailJS | `src/Login.js` | SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY, API_PUBLIC_KEY |
+| GNews   | `src/News.js`  | GNEWS_API_KEY                       |
 
-No arquivo src/LoginScreen.js, substitua as variáveis:
+---
 
-const SERVICE_ID = 'SEU_SERVICE_ID';
-const TEMPLATE_ID = 'SEU_TEMPLATE_ID';
-const PUBLIC_KEY = 'SUA_PUBLIC_KEY';
+## ▶️ Como Rodar (Ambiente de Desenvolvimento)
 
+Inicie o servidor:
 
-Passo B: GNews (Notícias)
-
-Obtenha uma chave gratuita no GNews.io.
-
-No arquivo src/NewsScreen.js, substitua a variável:
-
-const GNEWS_API_KEY = 'SUA_API_KEY_GNEWS';
-
-
-4. Inicie o App
-
+```bash
 npx expo start
+```
 
+**Opções de execução:**
 
-Para Celular: Escaneie o QR Code com o app Expo Go.
+* 📱 **Celular**: usar app Expo Go e escanear o QR Code.
+* 💻 **Web**: Pressione `w` no terminal.
+* 🤖 **Android Emulator**: Pressione `a`.
+* 🍎 **iOS Emulator**: Pressione `i`.
 
-Para Web: Pressione a tecla w no terminal.
+---
 
-📂 Estrutura do Projeto
+## 📲 Guia para Gerar APK (Android)
 
+### 🔧 1. Instalar EAS CLI
+
+```bash
+npm install -g eas-cli
+eas login
+```
+
+### 🔧 2. Configurar Build
+
+Se ainda não configurou:
+
+```bash
+eas build:configure
+```
+
+Substitua o conteúdo de **eas.json** por:
+
+```json
+{
+  "cli": { "version": ">= 7.0.0" },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": { "production": {} }
+}
+```
+
+### 🔧 3. Gerar o APK
+
+```bash
+eas build -p android --profile preview
+```
+
+Após concluir, o terminal exibirá um link para baixar o arquivo APK.
+
+---
+
+## ❓ Problemas Comuns
+
+* 🌐 **"Network request failed"** → rede bloqueada, proxy, VPN ou firewall.
+* 📱 **APK avisando segurança** → ocorre por não ser assinado pela Play Store.
+* 🖼️ **Ícones antigos/mudanças não aparecem** → limpar cache:
+  `expo start -c`
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
 /
-├── App.js              # Controlador principal (Gerencia se mostra Login ou Notícias)
-├── metro.config.js     # Configuração para compatibilidade Web (Polyfill Node v20)
+├── assets/              # Ícones e imagens
 ├── src/
-│   ├── LoginScreen.js  # Tela de Login, OTP e integração EmailJS
-│   └── NewsScreen.js   # Tela de lista de notícias e integração GNews
-├── assets/             # Imagens e ícones
-└── app.json            # Configurações do Expo
+│   ├── LoginScreen.js   # Autenticação e envio de OTP
+│   └── NewsScreen.js    # Feed de notícias e favoritos
+├── App.js               # Navegação principal
+├── app.json             # Configurações do Expo
+├── eas.json             # Configuração de build para APK
+└── README.md            # Documentação
+```
 
+---
 
-📄 Licença
+## 📄 Licença
 
-Este projeto é de livre uso para fins de estudo e portfólio.
+Este projeto é de livre uso para fins **educacionais** e de **portfólio**.
+Licença **MIT**.
+
+---

@@ -206,7 +206,7 @@ const NewsScreen = ({ onLogout }) => {
             <View style={styles.searchContainer}>
               <TextInput 
                 style={styles.searchInput}
-                placeholder="Buscar (ex: criptomoedas, política...)"
+                placeholder="Buscar"
                 placeholderTextColor="#aaa"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
